@@ -1,0 +1,37 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/item_setting"
+        android:orderInCategory="100"
+        android:title="@string/setting"
+        />
+
+    <item
+        android:id="@+id/item_display_answer"
+        android:orderInCategory="100"
+        android:title="@string/show_answer"
+        />
+
+    <item
+        android:id="@+id/item_clear_answer"
+        android:orderInCategory="100"
+        android:title="@string/clear_unselected"
+        />
+
+    <item
+        android:id="@+id/item_history_manager"
+        android:orderInCategory="100"
+        android:title="@string/history"
+        />
+
+    <item
+        android:id="@+id/item_mol_selector"
+        android:orderInCategory="100"
+        android:title="@string/specified_mol"
+        />
+
+    <item
+        android:id="@+id/item_about"
+        android:orderInCategory="100"
+        android:title="@string/about"
+        />
+</menu>

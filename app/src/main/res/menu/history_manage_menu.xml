@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/item_delete_history"
+        android:title="@string/delete_history" />
+
+    <item android:id="@+id/item_help"
+        android:title="@string/help" />
+</menu>

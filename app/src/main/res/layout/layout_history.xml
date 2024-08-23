@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <Button
+                android:id="@+id/btn_go_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/firebrick"
+                style="?android:attr/buttonBarButtonStyle"
+                app:icon="@drawable/ic_arrow_back_ios_24"
+                app:iconTint="@color/firebrick"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end|center"
+                android:id="@+id/history_action_bar">
+
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/transparent"
+                    android:visibility="invisible"
+                    />
+
+                <TextView
+                    android:id="@+id/more_options"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/font_large_size"
+                    android:text="@string/more"
+                    android:paddingHorizontal="@dimen/font_normal_size"
+                    android:paddingVertical="@dimen/view_margin_small_spacing"
+                    android:textColor="#1190CA"
+                    android:textStyle="bold"
+                    />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/scrollView_history">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/font_normal_size"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/answer_history"
+                    android:textSize="@dimen/font_large_size"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:textColor="@color/text_color"
+                    />
+                <TextView
+                    android:id="@+id/number_of_cards"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="共114条记录"
+                    android:textSize="@dimen/font_normal_size"
+                    android:textColor="@color/text_sub_color"
+                    android:layout_gravity="center_horizontal"/>
+
+                <TextView
+                    android:id="@+id/no_card"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/nothing_here"
+                    android:visibility="gone"
+                    android:textStyle="italic"
+                    android:textSize="@dimen/font_normal_size"
+                    />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/card_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/view_margin_small_spacing" />
+
+                </RelativeLayout>
+
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

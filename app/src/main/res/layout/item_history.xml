@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_card"
+    style="?attr/materialCardViewFilledStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/view_margin_small_spacing"
+    android:layout_marginEnd="@dimen/view_margin_small_spacing"
+    android:layout_marginBottom="@dimen/view_margin_small_spacing"
+    android:clickable="true"
+    android:orientation="vertical"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/card_bg">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:elevation="2dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/view_margin_small_spacing"
+            android:layout_marginBottom="@dimen/view_margin_small_spacing"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/view_margin_normal_spacing"
+            android:paddingEnd="@dimen/view_margin_normal_spacing">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/card_avatar"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_molecule"
+                android:padding="@dimen/view_margin_small_spacing"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/view_margin_small_spacing"
+                android:gravity="center|start"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/card_head_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/arbutus_slab"
+                    android:textColor="@color/text_color"
+                    android:textSize="@dimen/font_normal_size"
+                    android:textStyle="bold"
+                    tools:text="Title" />
+
+                <TextView
+                    android:id="@+id/card_head_sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/voces"
+                    android:maxLength="16"
+                    tools:text="subtitle" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/card_is_passed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:fontFamily="@font/bungee"
+                android:textColor="@color/darksalmon"
+                android:textSize="@dimen/font_small_size"
+                tools:text="PASSED" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/view_margin_small_spacing"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/view_margin_normal_spacing"
+            android:paddingEnd="@dimen/view_margin_normal_spacing">
+
+            <TextView
+                android:id="@+id/card_ctime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif"
+                tools:text="2024.8.23 16:00:00"
+                android:textSize="@dimen/font_subtitle_size"
+                android:textStyle="bold"
+                android:textColor="@color/text_color"
+                />
+
+            <TextView
+                android:id="@+id/card_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                tools:text="用时: 6:00 | 验证次数: 1"
+                android:textStyle="bold"
+                android:textColor="@color/text_sub_color"
+                android:textSize="@dimen/font_desc_size"
+                />
+
+
+
+            <View
+                android:id="@+id/view_cut"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginTop="@dimen/font_small_size"
+                android:background="@color/drawable_bg"
+                />
+
+
+
+            <TextView
+                android:id="@+id/card_pool_index"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                tools:text="分子库: L0"
+                android:textSize="@dimen/font_normal_size"
+                android:layout_marginTop="@dimen/view_margin_small_spacing"
+                />
+
+            <TextView
+                android:id="@+id/card_mol_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                tools:text="MOL: 10.mol"
+                android:textSize="@dimen/font_normal_size"
+                />
+
+            <TextView
+                android:id="@+id/card_chiral_carbons_count"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                tools:text="手性碳数量: 10"
+                android:textSize="@dimen/font_normal_size"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/view_margin_small_spacing"
+                android:gravity="end">
+
+                <Button
+                    android:id="@+id/reanswer"
+                    style="@style/Widget.Material3.Button.IconButton.Filled"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginBottom="@dimen/view_margin_small_spacing"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/burlywood"
+                    android:fontFamily="@font/arbutus_slab"
+                    android:text="@string/reanswer"
+                    android:textColor="@color/black"
+                    app:icon="@drawable/ic_get"
+                    app:iconTint="@color/black" />
+
+
+                <Button
+                    android:id="@+id/del"
+                    style="@style/Widget.Material3.Button.IconButton.Filled"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginBottom="@dimen/view_margin_small_spacing"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/brown"
+                    android:fontFamily="@font/arbutus_slab"
+                    android:text="@string/delete"
+                    android:textColor="@color/aliceblue"
+                    app:icon="@drawable/ic_delete_24"
+                    app:iconTint="@color/aliceblue" />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+
+</com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Night.Theme.ChiralCaptcha" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Rikka.Material3</item>
+    </style>
+
+</resources>

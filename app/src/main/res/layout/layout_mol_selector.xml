@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <Button
+            android:id="@+id/btn_go_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/firebrick"
+            style="?android:attr/buttonBarButtonStyle"
+            app:icon="@drawable/ic_arrow_back_ios_24"
+            app:iconTint="@color/firebrick"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end|center">
+
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/transparent"
+                android:visibility="invisible"
+                />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mol_setter_title"
+            android:textStyle="bold"
+            android:textSize="@dimen/font_large_size"
+            android:textColor="@color/text_color"
+            android:layout_gravity="center"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/mol_setter_subtitle"
+            android:textColor="@color/text_sub_color" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/req_setting_card"
+            style="?attr/materialCardViewFilledStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/view_margin_small_spacing"
+            android:layout_marginEnd="@dimen/view_margin_small_spacing"
+            android:layout_marginBottom="@dimen/view_margin_small_spacing"
+            android:orientation="vertical"
+            android:layout_margin="@dimen/view_margin_normal_spacing"
+            app:cardBackgroundColor="@color/card_bg"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="@dimen/view_margin_normal_spacing">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center|start"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/view_margin_small_spacing">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_molecule"
+                        android:layout_centerHorizontal="true"
+                        />
+
+                </RelativeLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/menu"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/molpoolindex"
+                    android:layout_marginTop="@dimen/view_margin_normal_spacing">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actv_pool_index"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/mol_id"
+                    android:layout_marginTop="@dimen/view_margin_normal_spacing">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/mol_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Button
+                    android:id="@+id/go"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/view_margin_normal_spacing"
+                    android:text="@string/go">
+
+                </Button>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+
+    </LinearLayout>
+
+</LinearLayout>
