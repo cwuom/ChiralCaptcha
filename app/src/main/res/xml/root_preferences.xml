@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <PreferenceCategory android:title="一般设定 (标*的需重启生效)">
+    <PreferenceCategory android:title="一般设定">
         <rikka.material.preference.MaterialSwitchPreference
             android:icon="@drawable/ic_lock_24"
             android:key="limit_quantity"
@@ -34,6 +34,14 @@
             android:defaultValue="true"
             />
 
+        <rikka.material.preference.MaterialSwitchPreference
+            android:icon="@drawable/ic_navigate_next_24"
+            android:key="sequential_load_mode"
+            android:title="顺序加载模式"
+            android:summary="顺序加载分子数据库中的数据，可在下方指定分子数据库。此选项与限制生成数量冲突。"
+            android:defaultValue="false"
+            />
+
         <rikka.preference.SimpleMenuPreference
             android:defaultValue="1"
             android:entries="@array/mol_pool"
@@ -41,7 +49,7 @@
             android:icon="@drawable/ic_molecule"
             android:key="mol_pool_index"
             android:summary="%s"
-            android:title="* 分子数据库"
+            android:title="分子数据库"
             />
 
     </PreferenceCategory>
@@ -109,7 +117,36 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/about">
+    <PreferenceCategory android:title="统计">
+
+        <Preference
+            android:title="有效通过数"
+            app:key="passed_count"
+            app:summary="N/A" />
+
+        <Preference
+            android:title="验证错误次数"
+            app:key="not_passed_count"
+            app:summary="N/A" />
+
+        <Preference
+            android:title="平均通过时间"
+            app:key="average_duration"
+            app:summary="N/A" />
+
+        <Preference
+            android:title="清空统计数据"
+            app:key="clear_stats"
+            app:summary="此操作不可逆" />
+
+        <Preference
+            android:title="清空顺序作答记录"
+            app:key="clear_sequential_index"
+            app:summary="此操作不可逆" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="关于">
         <Preference
             app:summary="@string/app_description_cn" />
 

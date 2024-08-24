@@ -24,13 +24,10 @@ public class CSnackbar {
 
     public void show(String message, int duration) {
         snackbarText.setText(message);
-        // 设置背景颜色
         snackbarView.setBackgroundColor(Color.parseColor("#00000000"));
-        // 创建 Toast 并设置视图
         Toast toast = new Toast(context);
         toast.setDuration(duration);
         toast.setView(snackbarView);
-        toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 30); // 设置位置
         toast.show();
     }
 }

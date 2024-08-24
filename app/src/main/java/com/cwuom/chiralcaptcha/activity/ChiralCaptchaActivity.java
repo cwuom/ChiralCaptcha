@@ -1,6 +1,12 @@
 package com.cwuom.chiralcaptcha.activity;
 
 import static com.cwuom.chiralcaptcha.statics.Constants.MAX_MOLECULES;
+import static com.cwuom.chiralcaptcha.util.AppConfig.addAverageDuration;
+import static com.cwuom.chiralcaptcha.util.AppConfig.addFileIndex;
+import static com.cwuom.chiralcaptcha.util.AppConfig.addNotPassedCount;
+import static com.cwuom.chiralcaptcha.util.AppConfig.addPassedCount;
+import static com.cwuom.chiralcaptcha.util.AppConfig.getFileIndex;
+import static com.cwuom.chiralcaptcha.util.AppConfig.subFileIndex;
 import static com.cwuom.chiralcaptcha.util.Utils.snackbar;
 
 import android.annotation.SuppressLint;
@@ -62,6 +68,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressLint("StaticFieldLeak")
@@ -70,9 +81,9 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
     private static ActivityChiralCaptchaBinding binding;
     private static DarkModeViewModel darkModeViewModel;
     private String currentMoleculeStr = null;
-    private int cMoleculePoolIndex = 1;
+    private static int cMoleculePoolIndex = 1;
     private String cMoleculePath = "";
-    private String cFilename;
+    private static String cFilename;
     private static HashSet<Integer> chiralCarbons = null;
     private static Molecule mol; // current molecule
     private CountDownTimer countDownTimer;
@@ -90,15 +101,20 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
     private HistoryDao historyDao;
     private EntityHistory entityHistory;
 
-    private static boolean do_not_check_cheating = false;
+    long elapsedTimeMillis;
+
+    private static boolean doNotCheckCheating = false;
     private static boolean isLimitCCQuantity = false;
     private static boolean isHideCCQuantity = false;
     private static boolean dynamicAnswerTimeEnabled = false;
-    private static int max_cc_generated_quantity = 0;
-    private static int min_cc_generated_quantity = 0;
+    private static boolean isSequentialLoadMode = false;
+    private static int maxCCGeneratedQuantity = 0;
+    private static int minCcGeneratedQuantity = 0;
     private static int preloadCount = 0;
     private static int maxViewCount = 0;
     private static int maxStorageCount = 0;
+
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,22 +158,23 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
 
     void readAppConfig(boolean toastErr) {
         baseWaitTime = AppConfig.getAnswerTimeBase(this) * 1000L;
-        do_not_check_cheating = AppConfig.getDisableScoreCheck(this);
-        isLimitCCQuantity = AppConfig.getLimitQuantity(this);
-        isHideCCQuantity = AppConfig.getHideQuantity(this);
-        dynamicAnswerTimeEnabled = AppConfig.getDynamicAnswerTime(this);
-        max_cc_generated_quantity = AppConfig.getMaxQuantity(this);
-        min_cc_generated_quantity = AppConfig.getMinQuantity(this);
+        doNotCheckCheating = AppConfig.isDisableScoreCheck(this);
+        isLimitCCQuantity = AppConfig.isLimitQuantity(this);
+        isHideCCQuantity = AppConfig.isHideQuantity(this);
+        dynamicAnswerTimeEnabled = AppConfig.isDynamicAnswerTime(this);
+        maxCCGeneratedQuantity = AppConfig.getMaxQuantity(this);
+        minCcGeneratedQuantity = AppConfig.getMinQuantity(this);
         preloadCount = AppConfig.getPreloadCount(this);
         maxStorageCount = AppConfig.getMaxStorageCount(this);
         maxViewCount = AppConfig.getMaxViewCount(this);
         cMoleculePoolIndex = AppConfig.getMolPoolIndex(this);
+        isSequentialLoadMode = AppConfig.isSequentialLoadMode(this);
 
         if (isLimitCCQuantity){
             var ref = new Object() {
                 String err = "";
             };
-            if (max_cc_generated_quantity - min_cc_generated_quantity <= 1){
+            if (maxCCGeneratedQuantity - minCcGeneratedQuantity <= 1){
                 isLimitCCQuantity = false;
                 ref.err = "请配置生成数量的范围，它太小了";
             }
@@ -168,7 +185,7 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
             }
 
             if (!isLimitCCQuantity && toastErr) {
-                Utils.runOnUiThread(() -> snackbar(getAppContext(), ref.err));
+                snackbar(getAppContext(), ref.err);
             }
         }
 
@@ -191,31 +208,42 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
         darkModeViewModel.getDarkModeState().observe(this, isDarkMode -> MoleculeView.initTextColor());
 
         new Thread(() -> {
-            // Load and generate molecules
             if (!recreate) {
-                structuralUpdater(null);
+                // Generate and load molecule
+                structuralUpdater(null, false);
             } else {
                 try {
+                    // load molecule
                     mol = MdlMolParser.parseString(currentMoleculeStr);
                     chiralCarbons = ChiralCarbonHelper.getMoleculeChiralCarbons(mol);
+
+                    runOnUiThread(() -> {
+                        // Set molecule to the view
+                        binding.moleculeView.setMolecule(mol);
+                        hideLoadingIndicator();
+                        topBarSubTitleUpdater();
+                    });
                 } catch (MdlMolParser.BadMolFormatException e) {
-                    throw new RuntimeException(e);
+                    throw new IllegalArgumentException(e);
                 }
             }
-
-
-            runOnUiThread(() -> {
-                // Set molecule to the view
-                binding.moleculeView.setMolecule(mol);
-                binding.tvLoading.setVisibility(View.GONE);
-                topBarSubTitleUpdater();
-            });
         }).start();
 
 
 
         // change the molecule
-        binding.btnNextMolecule.setOnClickListener(v -> structuralUpdater(null));
+        binding.btnNextMolecule.setOnClickListener(v -> new Thread(() -> structuralUpdater(null, false)).start());
+        binding.btnPreviousMolecule.setOnClickListener(v -> {
+            EntityHistory e = historyDao.getPreviousHistoryEntry();
+            if (e != null) {
+                historyDao.deleteHistoryByCTime(ctime);
+                mol = getMolecule(e.getCMolPath());
+                structuralUpdater(mol, true);
+                historyDao.deleteHistoryByCTime(e.getCtime());
+            } else {
+                snackbar(getAppContext(), "没有找到上一题的记录");
+            }
+        });
 
         // check the answer
         binding.btnCheck.setOnClickListener(v -> {
@@ -237,25 +265,25 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
 
             if (passed) {
                 onPassed();
-            } else {
-                if (binding.moleculeView.getSelectedChiral().length == 0){
-                    snackbar(getAppContext(),"请先选择");
-                } else {
-                    snackbar(getAppContext(),"有"+error+"处错误");
-                }
-                error = 0;
+                return;
             }
+            if (binding.moleculeView.getSelectedChiral().length == 0){
+                snackbar(getAppContext(),"请先选择");
+                checkCount--;
+            } else {
+                snackbar(getAppContext(),"检查到"+error+"处错误");
+                addNotPassedCount(getAppContext(), 1);
+            }
+            error = 0;
         });
 
         binding.btnStart.setOnClickListener(v -> startTimer());
 
-        if (passed){
-            binding.btnStart.setClickable(false);
-        }
     }
 
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
     void onPassed(){
+        binding.btnStart.setClickable(false);
         binding.btnCheck.setVisibility(View.GONE);
         binding.btnNextMolecule.setText("Next");
         snackbar(getAppContext(), "验证通过！");
@@ -264,6 +292,9 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
         if (isCheating) {
             binding.btnStart.setText("查看答案后此项无效");
             binding.btnStart.setTextColor(getColor(R.color.orangered));
+        } else {
+            addPassedCount(getAppContext(), 1);
+            addAverageDuration(getAppContext(), elapsedTimeMillis);
         }
         try {
             updateEntityHistory();
@@ -274,23 +305,52 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    public void structuralUpdater(Molecule mol2) {
+    public void structuralUpdater(Molecule mol2, boolean prev) {
         readAppConfig(true);
         historyDao.deleteOlderThanX(maxStorageCount);
 
+        if (prev){
+            binding.btnNextMolecule.setVisibility(View.VISIBLE);
+        }
+
         try {
             stopTimer();
+            if (mol2 == null) {
+                if (mol != null && !passed && isSequentialLoadMode && getFileIndex(getAppContext()) < getMaxMolIdForSelectedValue(cMoleculePoolIndex)) {
+                    updateEntityHistory();
+                }
+                Utils.runOnUiThread(this::showLoadingIndicator);
+                if (!isSequentialLoadMode){
+                    int result = randomMolecule();
+                    if (result != 1){
+                        Utils.runOnUiThread(() -> binding.topAppBar.setSubtitle("载入超时，请检查生成范围"));
+
+                        if (result == 3){
+                            Utils.runOnUiThread(() -> binding.topAppBar.setSubtitle("出现未知错误"));
+                        }
+
+                        Utils.runOnUiThread(() -> binding.topAppBar.setSubtitleTextColor(getColor(R.color.orangered)));
+                        Utils.runOnUiThread(this::hideLoadingIndicator);
+
+                        return;
+                    }
+                } else {
+                    addFileIndex(getAppContext(), cMoleculePoolIndex);
+                    int file_index = getFileIndex(getAppContext());
+                    mol = getMolecule(String.format("mol_%s/", cMoleculePoolIndex) + file_index + ".mol");
+                }
+
+            } else {
+                mol = mol2;
+            }
+
+            if (prev && isSequentialLoadMode){
+                subFileIndex(getAppContext());
+            }
 
             runOnUiThread(() -> {
-                if (mol2 == null) {
-                    if (mol != null && !passed) {
-                        updateEntityHistory();
-                    }
-                    mol = randomMolecule(cMoleculePoolIndex);
-                } else {
-                    mol = mol2;
-                }
                 chiralCarbons = ChiralCarbonHelper.getMoleculeChiralCarbons(mol);
+                hideLoadingIndicator();
 
                 binding.moleculeView.setMolecule(mol);
                 topBarSubTitleUpdater();
@@ -302,7 +362,7 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
                     }
 
                     binding.moleculeView.onTouchEvent(event);
-                    topBarSubTitleUpdater();
+
 
                     return true;
                 });
@@ -312,23 +372,48 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
                 }
 
                 resetCfg();
+                Logger.e(String.valueOf(getFileIndex(getAppContext())));
+                Logger.e(String.valueOf(getFileIndex(getAppContext())));
                 createEntityHistory();
+                if (getFileIndex(getAppContext()) == getMaxMolIdForSelectedValue(cMoleculePoolIndex)){
+                    binding.btnNextMolecule.setVisibility(View.GONE);
+                }
+
             });
 
         } catch (Exception e) {
-            Logger.e("Cannot load molecule: " + e.getMessage());
+            Logger.e("Cannot load molecule: " + e);
         }
+
     }
 
-    void topBarSubTitleUpdater(){
+    public void showLoadingIndicator(){
+        binding.tvLoading.setVisibility(View.VISIBLE);
+        binding.tvLoading.setText("载入中..");
+        binding.moleculeView.setVisibility(View.GONE);
+        binding.btnStart.setClickable(false);
+        binding.btnCheck.setClickable(false);
+        binding.btnPreviousMolecule.setClickable(false);
+        binding.btnNextMolecule.setClickable(false);
+    }
+
+    public void hideLoadingIndicator(){
+        binding.tvLoading.setVisibility(View.GONE);
+        binding.moleculeView.setVisibility(View.VISIBLE);
+        binding.btnStart.setClickable(true);
+        binding.btnCheck.setClickable(true);
+        binding.btnPreviousMolecule.setClickable(true);
+        binding.btnNextMolecule.setClickable(true);
+    }
+
+    public static void topBarSubTitleUpdater(){
         int c = binding.moleculeView.getSelectedChiralCount();
+        binding.topAppBar.setSubtitleTextColor(getAppContext().getColor(R.color.text_sub_color));
         if (!isHideCCQuantity){
             binding.topAppBar.setSubtitle("L" + (cMoleculePoolIndex) + " | " + cFilename + " | " +
                     c + "/" + chiralCarbons.size());
             if (c > chiralCarbons.size()){
-                binding.topAppBar.setSubtitleTextColor(getColor(R.color.orangered));
-            } else {
-                binding.topAppBar.setSubtitleTextColor(getColor(R.color.text_sub_color));
+                binding.topAppBar.setSubtitleTextColor(getAppContext().getColor(R.color.orangered));
             }
         } else {
             binding.topAppBar.setSubtitle("L" + (cMoleculePoolIndex) +" | " + cFilename);
@@ -392,35 +477,50 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
     }
 
 
-    private Molecule randomMolecule(int pl_index) {
-        while (true) {
-            cFilename = RandomUtil.randint(1, MAX_MOLECULES[pl_index-1]) + ".mol";
-            try {
-                AssetManager am = getAppContext().getAssets();
-                cMoleculePath = String.format("mol_%s/", pl_index) + cFilename;
-                InputStream is = am.open(cMoleculePath);
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+    private int randomMolecule() {
+        Future<?> future = executor.submit(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                cMoleculePoolIndex = RandomUtil.randint(1, 4);
+                cFilename = RandomUtil.randint(1, MAX_MOLECULES[cMoleculePoolIndex - 1]) + ".mol";
+                try {
+                    AssetManager am = getAppContext().getAssets();
+                    cMoleculePath = String.format("mol_%s/", cMoleculePoolIndex) + cFilename;
+                    InputStream is = am.open(cMoleculePath);
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 
-                StringBuilder molStr = new StringBuilder();
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    molStr.append(line).append("\n");
-                }
-                bufferedReader.close();
-                is.close();
+                    StringBuilder molStr = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        molStr.append(line).append("\n");
+                    }
+                    bufferedReader.close();
+                    is.close();
 
-                currentMoleculeStr = molStr.toString();
-                Molecule mol = MdlMolParser.parseString(molStr.toString());
-                if (!isLimitCCQuantity){
-                    return mol;
+                    currentMoleculeStr = molStr.toString();
+                    mol = MdlMolParser.parseString(molStr.toString());
+                    if (!isLimitCCQuantity){
+                        return;
+                    }
+                    int size = ChiralCarbonHelper.getMoleculeChiralCarbons(mol).size();
+                    if (size > minCcGeneratedQuantity && size <= maxCCGeneratedQuantity){
+                        return;
+                    }
+
+                    mol = null;
+                } catch (IOException | MdlMolParser.BadMolFormatException e) {
+                    throw new IllegalStateException("Error reading or parsing the mol file: " + cFilename + "\n" + e);
                 }
-                int size = ChiralCarbonHelper.getMoleculeChiralCarbons(mol).size();
-                if (size > min_cc_generated_quantity && size <= max_cc_generated_quantity){
-                    return mol;
-                }
-            } catch (IOException | MdlMolParser.BadMolFormatException e) {
-                throw new RuntimeException("Error reading or parsing the mol file: " + cFilename + "\n" + e);
             }
+        });
+
+        try {
+            future.get(5, TimeUnit.SECONDS);
+            return 1;
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            return 2;
+        } catch (Exception e) {
+            return 3;
         }
 
 
@@ -430,6 +530,7 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
         try {
             AssetManager am = getAppContext().getAssets();
             cMoleculePath = path;
+            cFilename = cMoleculePath.split("/")[1];
 
             InputStream is = am.open(cMoleculePath);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
@@ -445,7 +546,7 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
             currentMoleculeStr = molStr.toString();
             return MdlMolParser.parseString(molStr.toString());
         } catch (IOException | MdlMolParser.BadMolFormatException e) {
-            throw new RuntimeException("Error reading or parsing the mol file: " + cFilename + "\n" + e);
+            throw new IllegalStateException("Error reading or parsing the mol file: " + cFilename + "\n" + e);
         }
 
     }
@@ -462,8 +563,6 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
         outState.putInt("error", error);
         outState.putBoolean("isTimeout", isTimeout);
         outState.putInt("checkCount", checkCount);
-
-        outState.putString("currentMoleculeStr", currentMoleculeStr);
         outState.putInt("cMoleculePoolIndex", cMoleculePoolIndex);
         outState.putString("cMoleculePath", cMoleculePath);
         outState.putString("fileName", cFilename);
@@ -502,7 +601,7 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.item_display_answer) {  // view the reference answer
             binding.moleculeView.displayAnswer(chiralCarbons);
             binding.btnStart.setClickable(false);
-            if (!do_not_check_cheating){
+            if (!doNotCheckCheating){
                 isCheating = true;
             }
         } else if (item.getItemId() == R.id.item_about) {  // about
@@ -532,7 +631,7 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
     @SuppressLint({"SetTextI18n", "DefaultLocale"})
     private void calculateElapsedTime() {
         long endTimeMillis = System.currentTimeMillis();
-        long elapsedTimeMillis = endTimeMillis - startTimeMillis;
+        elapsedTimeMillis = endTimeMillis - startTimeMillis;
         int elapsedSeconds = (int) (elapsedTimeMillis / 1000);
         cElapsedTimeFormatted = String.format("%02d:%02d", elapsedSeconds / 60, elapsedSeconds % 60);
         binding.btnStart.setText("用时: " + cElapsedTimeFormatted + " | 验证次数: " + checkCount);
@@ -566,6 +665,7 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
                 binding.btnStart.setText("回答超时");
                 binding.btnStart.setTextColor(getColor(R.color.orangered));
                 binding.moleculeView.displayAnswer(chiralCarbons);
+                binding.btnNextMolecule.setText("Next");
                 binding.moleculeView.setOnTouchListener((v1, event) -> true);
                 isTimeout = true;
             }
@@ -588,64 +688,59 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
 
     void showMoleculeSelector(){
         BottomDialog.show("", "",
-                new OnBindView<>(R.layout.layout_mol_selector) {
-                    @SuppressLint("SetTextI18n")
-                    @Override
-                    public void onBind(BottomDialog dialog12, View v) {
-                        v.findViewById(R.id.btn_go_back).setOnClickListener(v1 -> dialog12.dismiss());
-                        dialog12.setBackgroundColor(getColor(R.color.background));
-                        AutoCompleteTextView actv = v.findViewById(R.id.actv_pool_index);
-                        TextInputEditText molId = v.findViewById(R.id.mol_id);
+            new OnBindView<>(R.layout.layout_mol_selector) {
+                @SuppressLint("SetTextI18n")
+                @Override
+                public void onBind(BottomDialog dialog12, View v) {
+                    v.findViewById(R.id.btn_go_back).setOnClickListener(v1 -> dialog12.dismiss());
+                    dialog12.setBackgroundColor(getColor(R.color.background));
+                    AutoCompleteTextView actv = v.findViewById(R.id.actv_pool_index);
+                    TextInputEditText molId = v.findViewById(R.id.mol_id);
 
-                        String[] poolIndex = {"L1 (5000 molecules)", "L2 (4999 molecules)", "L3 (1000 molecules)", "L4 (373 molecules)"};
-                        actv.setText(poolIndex[0], true);
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(getAppContext(), R.layout.custom_dropdown_item, poolIndex);
-                        actv.setAdapter(adapter);
+                    String[] poolIndex = {"L1 (5000 molecules)", "L2 (4999 molecules)", "L3 (1000 molecules)", "L4 (373 molecules)"};
+                    actv.setText(poolIndex[0], true);
+                    actv.setAdapter(new ArrayAdapter<>(getAppContext(), R.layout.custom_dropdown_item, poolIndex));
 
 
-                        final int[] selectedValue = {1};
-                        actv.setOnItemClickListener((parent, view, position, id) -> {
-                            selectedValue[0] = position + 1;
-                            Log.d("SelectedPoolIndex", "Selected value: " + selectedValue[0]);
-                        });
+                    final int[] selectedValue = {1};
+                    actv.setOnItemClickListener((parent, view, position, id) -> {
+                        selectedValue[0] = position + 1;
+                        Log.d("SelectedPoolIndex", "Selected value: " + selectedValue[0]);
+                    });
 
-                        v.findViewById(R.id.go).setOnClickListener(v1 -> {
-                            if (Objects.requireNonNull(molId.getText()).toString().isEmpty()) {
-                                snackbar(getAppContext(), "请输入题目编号");
-                                return;
+                    v.findViewById(R.id.go).setOnClickListener(v1 -> {
+                        if (Objects.requireNonNull(molId.getText()).toString().isEmpty()) {
+                            snackbar(getAppContext(), "请输入题目编号");
+                            return;
+                        }
+
+                        try {
+                            int molIdInt = Integer.parseInt(molId.getText().toString());
+                            int maxMolId = getMaxMolIdForSelectedValue(selectedValue[0]);
+
+                            if (molIdInt < 1 || molIdInt > maxMolId) {
+                                snackbar(getAppContext(), "题目编号应在1~" + maxMolId + "之间");
+                            } else {
+                                changeMolecules(selectedValue[0], molIdInt + ".mol");
+                                dialog12.dismiss();
                             }
-
-                            try {
-                                int molIdInt = Integer.parseInt(molId.getText().toString());
-                                int maxMolId = getMaxMolIdForSelectedValue(selectedValue[0]);
-
-                                if (molIdInt < 1 || molIdInt > maxMolId) {
-                                    snackbar(getAppContext(), "题目编号应在1~" + maxMolId + "之间");
-                                } else {
-                                    changeMolecules(selectedValue[0], molIdInt + ".mol");
-                                    dialog12.dismiss();
-                                }
-                            } catch (NumberFormatException e) {
-                                snackbar(getAppContext(), "请输入整数");
-                            }
-                        });
-                    }
-                });
+                        } catch (NumberFormatException e) {
+                            snackbar(getAppContext(), "请输入整数");
+                        }
+                    });
+                }
+            });
 
 
     }
 
-    private int getMaxMolIdForSelectedValue(int selectedValue) {
-        switch (selectedValue) {
-            case 2:
-                return Constants.MAX_MOLECULES_L2;
-            case 3:
-                return Constants.MAX_MOLECULES_L3;
-            case 4:
-                return Constants.MAX_MOLECULES_L4;
-            default:
-                return Constants.MAX_MOLECULES_L1;
-        }
+    public int getMaxMolIdForSelectedValue(int selectedValue) {
+        return switch (selectedValue) {
+            case 2 -> Constants.MAX_MOLECULES_L2;
+            case 3 -> Constants.MAX_MOLECULES_L3;
+            case 4 -> Constants.MAX_MOLECULES_L4;
+            default -> Constants.MAX_MOLECULES_L1;
+        };
     }
 
 
@@ -679,14 +774,17 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
 
         action_bar.setOnLongClickListener(v13 -> scrollViewHistory.post(() -> scrollViewHistory.smoothScrollTo(0, 0)));
 
-        if (localCard != null && !localCard.isEmpty()){
+        if (localCard == null || localCard.isEmpty()) {
+            tv_count.setText("");
+            tv_no_card.setVisibility(View.VISIBLE);
+        } else {
             tv_count.setText(getString(R.string.number_of_cards, Objects.requireNonNull(localCard).size()+""));
             HistoryAdapter cardHistoryAdapter = new HistoryAdapter((ArrayList<EntityHistory>) localCard, this, count -> {
-                if (count > 0) {
-                    tv_count.setText(getString(R.string.number_of_cards, count + ""));
-                } else {
+                if (count <= 0) {
                     tv_count.setText("");
                     tv_no_card.setVisibility(View.VISIBLE);
+                } else {
+                    tv_count.setText(getString(R.string.number_of_cards, count + ""));
                 }
 
             }, (action, entity, pos) -> doEntityHistoryAction(action, entity, pos, rv_card_list, dialog), maxViewCount);
@@ -710,9 +808,6 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
                 }
             });
 
-        } else {
-            tv_count.setText("");
-            tv_no_card.setVisibility(View.VISIBLE);
         }
 
         tv_more_options.setOnClickListener(v14 -> {
@@ -736,7 +831,8 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
                 if (id == R.id.item_help){
                     new MaterialAlertDialogBuilder(v14.getContext())
                             .setTitle("历史管理器说明")
-                            .setMessage("采用懒加载，下滑会自动更新\n注: 至多显示200条记录, 250条往后的记录会被自动删除\n长按上方操作栏可快速滚动到顶部")
+                            .setMessage( "采用懒加载，下滑会自动更新\n注: 至多显示"
+                                    +maxViewCount+"条记录, "+maxStorageCount+"条往后的记录会被自动删除\n长按上方操作栏可快速滚动到顶部")
                             .show();
                 }
                 return false;
@@ -765,11 +861,11 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
             cFilename = filename;
 
             mol = getMolecule(String.format("mol_%s/", cMoleculePoolIndex) + cFilename);
-            structuralUpdater(mol);
+            structuralUpdater(mol, false);
 
             runOnUiThread(() -> {
                 binding.moleculeView.setMolecule(mol);
-                binding.tvLoading.setVisibility(View.GONE);
+                hideLoadingIndicator();
                 topBarSubTitleUpdater();
             });
         }).start();

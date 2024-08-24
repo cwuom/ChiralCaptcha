@@ -235,6 +235,7 @@ public class MoleculeView extends View {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             performVibrateClick(ChiralCaptchaActivity.getAppContext());
         }
+        ChiralCaptchaActivity.topBarSubTitleUpdater();
         invalidate();
     }
 
@@ -383,6 +384,7 @@ public class MoleculeView extends View {
             else
                 scale = Math.min(scale, (heightLimit - fontSize * 2 - getPaddingTop() - getPaddingBottom()) / ry);
         }
+
         if (molecule != null && scale > 0) {
             float avl = molecule.getAverageBondLength();
             if (avl > 0) {

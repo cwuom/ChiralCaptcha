@@ -82,7 +82,11 @@ public class Utils {
     }
 
     public static void snackbar(Context ctx, String text){
-        CSnackbar CSnackbar = new CSnackbar(ctx);
-        CSnackbar.show(text, Toast.LENGTH_SHORT);
+        runOnUiThread(() -> {
+            CSnackbar CSnackbar = new CSnackbar(ctx);
+            CSnackbar.show(text, Toast.LENGTH_SHORT);
+        });
+
     }
+
 }

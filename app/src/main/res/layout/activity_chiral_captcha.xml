@@ -74,6 +74,17 @@
                 android:orientation="horizontal">
 
                 <Button
+                    android:id="@+id/btn_previous_molecule"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/previous"
+                    android:fontFamily="@font/arbutus_slab"
+                    android:textStyle="bold"
+                    />
+
+                <Button
                     android:id="@+id/btn_next_molecule"
                     style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="0dp"
@@ -84,18 +95,27 @@
                     android:textStyle="bold"
                     />
 
-                <Button
-                    android:id="@+id/btn_check"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/check"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/arbutus_slab"
-                    />
-
             </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_check"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/check"
+                android:textStyle="bold"
+                android:fontFamily="@font/arbutus_slab"
+                android:textColor="@color/text_sub_color"
+                />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="@color/cut_out_bg"
+                android:layout_marginTop="@dimen/view_margin_normal_spacing"
+                android:layout_marginStart="@dimen/view_margin_small_spacing"
+                android:layout_marginEnd="@dimen/view_margin_small_spacing"
+                />
 
             <Button
                 android:id="@+id/btn_start"
@@ -103,8 +123,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/start"
-                android:layout_marginTop="@dimen/view_margin_small_spacing"
+                android:textColor="@color/text_sub_color"
                 />
+
 
         </LinearLayout>
 

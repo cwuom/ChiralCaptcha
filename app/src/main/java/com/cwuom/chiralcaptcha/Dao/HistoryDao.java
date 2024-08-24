@@ -64,6 +64,10 @@ public interface HistoryDao {
     @Query("DELETE FROM t_history WHERE ctime = :ctime")
     void deleteHistoryByCTime(long ctime);
 
+
     @Query("DELETE FROM t_history WHERE cheating = 1")
     void deleteCheatingHistory();
+
+    @Query("SELECT * FROM t_history WHERE ctime <= (SELECT MAX(ctime) FROM t_history) ORDER BY ctime DESC LIMIT 1 OFFSET 1")
+    EntityHistory getPreviousHistoryEntry();
 }
