@@ -74,7 +74,7 @@ android {
 
 fun getShortGitRevision(): String {  // Auto Generate a VersionName
     val command = "git rev-parse --short HEAD"
-    val processBuilder = ProcessBuilder("cmd", "/c", command) // Only Run On Windows!
+    val processBuilder = ProcessBuilder(*command.split(" ").toTypedArray())
     val process = processBuilder.start()
 
     val output = process.inputStream.bufferedReader().use { it.readText() }
