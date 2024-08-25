@@ -178,11 +178,6 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
                 isLimitCCQuantity = false;
                 ref.err = "请配置生成数量的范围，它太小了";
             }
-            if (cMoleculePoolIndex > 2 && isLimitCCQuantity){
-                isLimitCCQuantity = false;
-                ref.err = "无法限制生成数量。分子数据库必须为L1或L2";
-
-            }
 
             if (!isLimitCCQuantity && toastErr) {
                 snackbar(getAppContext(), ref.err);
@@ -330,8 +325,12 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
                         }
 
                         Utils.runOnUiThread(() -> binding.topAppBar.setSubtitleTextColor(getColor(R.color.orangered)));
-                        Utils.runOnUiThread(this::hideLoadingIndicator);
-
+                        Utils.runOnUiThread(() -> {
+                            hideLoadingIndicator();
+                            binding.tvLoading.setVisibility(View.VISIBLE);
+                            binding.tvLoading.setText("寄");
+                            binding.moleculeView.setVisibility(View.GONE);
+                        });
                         return;
                     }
                 } else {
@@ -440,7 +439,7 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
         isTimeout = false;
         binding.btnStart.setTextColor(getColor(R.color.text_sub_color));
         checkCount = 0;
-        binding.btnNextMolecule.setText("Skip");
+        binding.btnNextMolecule.setText("换一题");
     }
 
     private void updateEntityHistory() {
@@ -665,7 +664,7 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
                 binding.btnStart.setText("回答超时");
                 binding.btnStart.setTextColor(getColor(R.color.orangered));
                 binding.moleculeView.displayAnswer(chiralCarbons);
-                binding.btnNextMolecule.setText("Next");
+                binding.btnNextMolecule.setText("下一题");
                 binding.moleculeView.setOnTouchListener((v1, event) -> true);
                 isTimeout = true;
             }

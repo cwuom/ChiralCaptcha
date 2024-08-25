@@ -34,6 +34,39 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <LinearLayout
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_previous_molecule"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/previous"
+                    android:textStyle="bold"
+                    android:drawableLeft="@drawable/ic_navigate_prev_24"
+                    android:drawableTint="@color/drawable_bg"
+                    />
+
+                <Button
+                    android:id="@+id/btn_next_molecule"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/change_mol"
+                    android:textStyle="bold"
+                    android:drawableRight="@drawable/ic_navigate_next_24"
+                    android:drawableTint="@color/drawable_bg"
+                    />
+
+            </LinearLayout>
+
             <com.cwuom.chiralcaptcha.chiral.carbon.MoleculeView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -66,37 +99,6 @@
                 />
 
 
-            <LinearLayout
-                style="?android:attr/buttonBarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btn_previous_molecule"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/previous"
-                    android:fontFamily="@font/arbutus_slab"
-                    android:textStyle="bold"
-                    />
-
-                <Button
-                    android:id="@+id/btn_next_molecule"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/change_mol"
-                    android:fontFamily="@font/arbutus_slab"
-                    android:textStyle="bold"
-                    />
-
-            </LinearLayout>
-
             <Button
                 android:id="@+id/btn_check"
                 style="?android:attr/buttonBarButtonStyle"
@@ -105,14 +107,13 @@
                 android:text="@string/check"
                 android:textStyle="bold"
                 android:fontFamily="@font/arbutus_slab"
-                android:textColor="@color/text_sub_color"
+                android:textColor="?android:textColorPrimary"
                 />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.5dp"
                 android:background="@color/cut_out_bg"
-                android:layout_marginTop="@dimen/view_margin_normal_spacing"
                 android:layout_marginStart="@dimen/view_margin_small_spacing"
                 android:layout_marginEnd="@dimen/view_margin_small_spacing"
                 />

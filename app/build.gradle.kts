@@ -17,13 +17,20 @@ android {
         versionCode.toInt()
     }
 
+    val appVerName: String by lazy {
+        val versionName = "${getShortGitRevision()}.${getCurrentDate()}"
+        println("versionName: $versionName")
+        versionName
+    }
+
+
 
     defaultConfig {
         applicationId = "com.cwuom.chiralcaptcha"
         minSdk = 29
         targetSdk = 34
         versionCode = appVerCode
-        versionName = "${getShortGitRevision()}.${getCurrentDate()}"
+        versionName = appVerName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -34,7 +41,6 @@ android {
     buildFeatures {
         buildConfig = true
         viewBinding = true
-        dataBinding = true
         compose = true
     }
 
@@ -93,6 +99,7 @@ fun getCurrentDate(): String { // Auto Generate a VersionCode
 configurations.configureEach {
     exclude(group = "androidx.appcompat", module = "appcompat")
 }
+
 
 dependencies {
     implementation(libs.appcompat)

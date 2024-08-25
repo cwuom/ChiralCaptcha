@@ -6,7 +6,7 @@
             android:icon="@drawable/ic_lock_24"
             android:key="limit_quantity"
             android:title="限制生成数量"
-            android:summary="启用此选项会限制随机生成的手性碳的数量，需要在「配置管理」里设置范围。此配置可能会延长手性碳生成时间。你必须在L1、L2分子数据库才能使此项生效。"
+            android:summary="启用此选项会限制随机生成的手性碳的数量，需要在「配置管理」里设置范围。此配置可能会延长手性碳生成时间"
             android:defaultValue="false"
             />
 
@@ -37,8 +37,8 @@
         <rikka.material.preference.MaterialSwitchPreference
             android:icon="@drawable/ic_navigate_next_24"
             android:key="sequential_load_mode"
-            android:title="顺序加载模式"
-            android:summary="顺序加载分子数据库中的数据，可在下方指定分子数据库。此选项与限制生成数量冲突。"
+            android:title="顺序作答模式"
+            android:summary="顺序加载分子数据库中的数据，可在下方指定分子数据库。此选项与限制生成数量冲突"
             android:defaultValue="false"
             />
 

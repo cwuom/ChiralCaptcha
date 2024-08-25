@@ -1,15 +1,26 @@
 <resources>
     <string name="app_name">ChiralCaptcha</string>
-    <string name="change_mol">Skip</string>
+    <string name="change_mol">换一题</string>
     <string name="check">Check</string>
-    <string name="loading">载入中...</string>
+    <string name="loading">Loading...</string>
     <string name="setting">高级设定..</string>
     <string name="about">关于</string>
-    <string name="app_description"><big>Android-based CAPTCHA generator demo.</big> \n\nIt specializes in generating complex molecular structure images containing chiral carbon atoms.\n\nDeveloped by cwuom, <strong>source code is available on <a href="https://github.com/cwuom/ChiralCaptcha">GitHub</a></strong>.</string>
-    <string name="app_description_cn"><big>基于Android的手性碳验证码生成器演示</big> \n\nChiralCaptcha专门用于生成包含手性碳原子的分子结构图像。\n\<strong>源代码可在 <a href="https://github.com/cwuom/ChiralCaptcha">GitHub</a> 上获取</strong>。\n\n灵感来源: QNotified, NeoAuthBotPlugin\n参考项目: QNotified</string>
+    <string name="app_description">
+        <big>Android-based CAPTCHA generator demo.</big>
+        Specializes in generating complex molecular structure images containing chiral carbon atoms.
+        Developed by cwuom, <strong>source code is available on <a href="https://github.com/cwuom/ChiralCaptcha">GitHub</a></strong>.
+    </string>
+    <string name="app_description_cn">
+        <big>基于Android的手性碳验证生成器演示</big>
+        ChiralCaptcha专门用于生成包含手性碳原子的复杂分子结构图像。
+        <strong>源代码可在 <a href="https://github.com/cwuom/ChiralCaptcha">GitHub</a> 上获取</strong>.
+
+        参考自: QNotified, NeoAuthBotPlugin.
+        灵感来源于: QNotified.
+    </string>
     <string name="show_answer">查看答案</string>
     <string name="clear_unselected">清空选中</string>
-    <string name="start">开始作答</string>
+    <string name="start">Start</string>
     <string name="history">答题历史</string>
     <string name="specified_mol">指定题目</string>
     <string name="get">Get</string>
@@ -27,6 +38,5 @@
     <string name="mol_id">题目编号</string>
     <string name="mol_setter_title">指定题目</string>
     <string name="help">帮助</string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="previous">Previous</string>
+    <string name="previous">上一题</string>
 </resources>

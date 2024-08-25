@@ -1,0 +1,8 @@
+<rotate xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_navigate_next_24"
+    android:fromDegrees="180"
+    android:toDegrees="180"
+    android:pivotX="50%"
+    android:pivotY="50%">
+
+</rotate>
