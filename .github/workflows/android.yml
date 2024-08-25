@@ -23,7 +23,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --warning-mode all
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v3

@@ -280,12 +280,12 @@ public class ChiralCaptchaActivity extends AppCompatActivity {
     void onPassed(){
         binding.btnStart.setClickable(false);
         binding.btnCheck.setVisibility(View.GONE);
-        binding.btnNextMolecule.setText("Next");
+        binding.btnNextMolecule.setText("下一题");
         snackbar(getAppContext(), "验证通过！");
         binding.moleculeView.setOnTouchListener((v1, event) -> true);
         calculateElapsedTime();
         if (isCheating) {
-            binding.btnStart.setText("查看答案后此项无效");
+            binding.btnStart.setText("无效成绩");
             binding.btnStart.setTextColor(getColor(R.color.orangered));
         } else {
             addPassedCount(getAppContext(), 1);

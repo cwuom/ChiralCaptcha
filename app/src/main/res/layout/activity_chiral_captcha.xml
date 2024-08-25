@@ -24,6 +24,16 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+
+    <Button
+        android:id="@+id/btn_start"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/start"
+        android:textColor="@color/text_sub_color"
+        />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -65,7 +75,17 @@
                     android:drawableTint="@color/drawable_bg"
                     />
 
+
             </LinearLayout>
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="@color/cut_out_bg"
+                android:layout_marginStart="@dimen/view_margin_small_spacing"
+                android:layout_marginEnd="@dimen/view_margin_small_spacing"
+                />
 
             <com.cwuom.chiralcaptcha.chiral.carbon.MoleculeView
                 android:layout_width="match_parent"
@@ -109,24 +129,6 @@
                 android:fontFamily="@font/arbutus_slab"
                 android:textColor="?android:textColorPrimary"
                 />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.5dp"
-                android:background="@color/cut_out_bg"
-                android:layout_marginStart="@dimen/view_margin_small_spacing"
-                android:layout_marginEnd="@dimen/view_margin_small_spacing"
-                />
-
-            <Button
-                android:id="@+id/btn_start"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/start"
-                android:textColor="@color/text_sub_color"
-                />
-
 
         </LinearLayout>
 
